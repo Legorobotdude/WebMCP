@@ -10,7 +10,7 @@
     "dev": "nodemon --watch src --ext ts,js,json --ignore dist/ --exec \"npm run build && npm run register:dev\"",
     "build": "ts-node src/scripts/build.ts",
     "register:dev": "node dist/scripts/register-dev.js",
-    "postinstall": "node dist/scripts/postinstall.js",
+    "postinstall": "node src/scripts/check-and-build.js && node dist/scripts/postinstall.js",
     "prepare:publish": "node ../scripts/replace-workspace-deps.cjs ./package.json",
     "prepublishOnly": "pnpm run build",
     "publish:npm": "npm publish --access public --no-git-checks",
