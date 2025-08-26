@@ -91,10 +91,11 @@ If you want to contribute to MCP-B or run the examples locally:
    # Edit apps/native-server/.env with your extension ID
    ```
 3. **Configure extension model provider and model name:**
-
    ```bash
-   cp apps/extension/.env.example apps/extension/.env
+   # Create a .dev.vars file in apps/backend from the example
+   cp apps/backend/.dev.vars.example apps/backend/.dev.vars
    # Edit apps/extension/.env with Open AI or Anthropic API Keys
+   # ANTHROPIC_API_KEY="your_claude_api_key_here"
    ```
 
 4. **Start development:**
