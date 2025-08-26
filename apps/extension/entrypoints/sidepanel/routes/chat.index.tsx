@@ -35,7 +35,7 @@ const Chat = () => {
       .from({ modelConfig: modelConfigCollection })
       .where(({ modelConfig }) => eq(modelConfig.id, '1'))
   );
-  const modelConfig = lqConfig.data[0] || defaultModelConfig;
+  const modelConfig = lqConfig.data?.[0] || defaultModelConfig;
 
   // // Example 1: Custom API URL while keeping system/tools forwarding
   const runtime = useChatRuntime({

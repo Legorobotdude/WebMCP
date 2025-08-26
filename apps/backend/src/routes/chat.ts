@@ -23,9 +23,9 @@ const PostRequestBodySchema = z.object({
  * them to lower-case.
  */
 const PostHeadersSchema = z.object({
-  'x-api-key': z.string().nonempty(),
+  'x-api-key': z.string().min(1),
   'x-model-provider': z.enum(['openai', 'anthropic']),
-  'x-model-name': z.string().nonempty(),
+  'x-model-name': z.string().min(1),
 });
 
 export const maxDuration = 30;
