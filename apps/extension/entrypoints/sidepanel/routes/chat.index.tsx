@@ -40,7 +40,7 @@ const Chat = () => {
   // // Example 1: Custom API URL while keeping system/tools forwarding
   const runtime = useChatRuntime({
     transport: new AssistantChatTransport({
-      api: 'https://localhost:8787/api/chat', // Custom API URL with trusted HTTPS for secure local dev
+      api: 'http://localhost:8787/api/chat', // Custom API URL with trusted HTTPS for secure local dev
       headers: {
         'x-model-provider': modelConfig.modelProvider,
         'x-model-name': getModelName(modelConfig) || '',
