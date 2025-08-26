@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Select,
   SelectContent,
@@ -10,56 +10,65 @@ import {
 import { Input } from '@/entrypoints/sidepanel/components/ui/input';
 import { Button } from '@/entrypoints/sidepanel/components/ui/button';
 import { Label } from '@/entrypoints/sidepanel/components/ui/label';
-import { useModelConfigStore, OPENAI_MODELS, ANTHROPIC_MODELS } from '../lib/modelConfig';
+import {
+  OPENAI_MODELS,
+  ANTHROPIC_MODELS,
+  modelConfigCollection,
+  ModelConfig,
+  modelGetKey,
+} from '../lib/modelConfig';
 import { X } from 'lucide-react';
 import { toast } from 'sonner';
+import { useLiveQuery, eq } from '@tanstack/react-db';
 
 const Settings = () => {
   const navigate = useNavigate();
 
-  // Use Zustand store for persistent config
-  const { config, setConfig, setApiKey, resetConfig } = useModelConfigStore();
-
   const [showOpenai, setShowOpenai] = useState<boolean>(false);
   const [showAnthropic, setShowAnthropic] = useState<boolean>(false);
 
+  const lq = useLiveQuery((q) =>
+    q
+      .from({ modelConfig: modelConfigCollection })
+      .where(({ modelConfig }) => eq(modelConfig.id, '1'))
+  );
+  const remoteConfig: ModelConfig | undefined = lq?.data?.[0];
+  const [localConfig, setLocalConfig] = useState<ModelConfig | null>(null);
+
+  useEffect(() => {
+    if (remoteConfig) setLocalConfig(remoteConfig);
+  }, [remoteConfig]);
+
   function save() {
-    // The Zustand store automatically persists changes, so no explicit save needed
-    // Show feedback to user that settings were saved
+    if (!localConfig) return;
+    modelConfigCollection.update(modelGetKey, (draft) => {
+      Object.assign(draft, localConfig);
+    });
     toast.success('Settings saved successfully!');
   }
 
   function handleProviderChange(newProvider: 'openai' | 'anthropic') {
-    setConfig({ modelProvider: newProvider });
+    setLocalConfig((c) => (c ? { ...c, modelProvider: newProvider } : c));
   }
 
   function handleOpenaiModelChange(modelName: string) {
-    setConfig({ openaiModelName: modelName });
+    setLocalConfig((c) => (c ? { ...c, openaiModelName: modelName } : c));
   }
 
   function handleAnthropicModelChange(modelName: string) {
-    setConfig({ anthropicModelName: modelName });
+    setLocalConfig((c) => (c ? { ...c, anthropicModelName: modelName } : c));
   }
 
   function handleOpenaiKeyChange(apiKey: string) {
-    if (config.modelProvider === 'openai') {
-      setApiKey(apiKey || null);
-    } else {
-      setConfig({ openaiApiKey: apiKey || undefined });
-    }
+    setLocalConfig((c) => (c ? { ...c, openaiApiKey: apiKey || undefined } : c));
   }
 
   function handleAnthropicKeyChange(apiKey: string) {
-    if (config.modelProvider === 'anthropic') {
-      setApiKey(apiKey || null);
-    } else {
-      setConfig({ anthropicApiKey: apiKey || undefined });
-    }
+    setLocalConfig((c) => (c ? { ...c, anthropicApiKey: apiKey || undefined } : c));
   }
 
-  function reload() {
-    // Reset to default configuration from environment
-    resetConfig();
+  if (localConfig === null) {
+    return <div className="p-4">Loading settings...</div>;
   }
 
   return (
@@ -79,7 +88,7 @@ const Settings = () => {
 
       <div className="mb-4">
         <Label>Model Provider</Label>
-        <Select value={config.modelProvider} onValueChange={handleProviderChange}>
+        <Select value={localConfig.modelProvider} onValueChange={handleProviderChange}>
           <SelectTrigger className="w-full">
             <SelectValue placeholder="Select a provider" />
           </SelectTrigger>
@@ -90,12 +99,12 @@ const Settings = () => {
         </Select>
       </div>
 
-      {config.modelProvider === 'openai' ? (
+      {localConfig.modelProvider === 'openai' ? (
         <div>
           <div className="mb-4">
             <Label>OpenAI Model</Label>
             <Select
-              value={config.openaiModelName ?? 'gpt-4o'}
+              value={localConfig.openaiModelName ?? 'gpt-4o'}
               onValueChange={handleOpenaiModelChange}
             >
               <SelectTrigger className="w-full">
@@ -116,7 +125,7 @@ const Settings = () => {
             <div className="flex gap-2">
               <Input
                 type={showOpenai ? 'text' : 'password'}
-                value={config.openaiApiKey ?? ''}
+                value={localConfig.openaiApiKey ?? ''}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   handleOpenaiKeyChange(e.target.value)
                 }
@@ -133,7 +142,7 @@ const Settings = () => {
           <div className="mb-4">
             <Label>Anthropic Model</Label>
             <Select
-              value={config.anthropicModelName ?? 'claude-sonnet-4-20250514'}
+              value={localConfig.anthropicModelName ?? 'claude-sonnet-4-20250514'}
               onValueChange={handleAnthropicModelChange}
             >
               <SelectTrigger className="w-full">
@@ -154,7 +163,7 @@ const Settings = () => {
             <div className="flex gap-2">
               <Input
                 type={showAnthropic ? 'text' : 'password'}
-                value={config.anthropicApiKey ?? ''}
+                value={localConfig.anthropicApiKey ?? ''}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   handleAnthropicKeyChange(e.target.value)
                 }
@@ -170,9 +179,6 @@ const Settings = () => {
 
       <div className="flex gap-2">
         <Button onClick={save}>Save</Button>
-        <Button variant="ghost" onClick={reload}>
-          Reload
-        </Button>
       </div>
     </div>
   );

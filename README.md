@@ -90,8 +90,14 @@ If you want to contribute to MCP-B or run the examples locally:
    cp apps/native-server/.env.example apps/native-server/.env
    # Edit apps/native-server/.env with your extension ID
    ```
+3. **Configure extension model provider and model name:**
 
-3. **Start development:**
+  ```bash
+  cp apps/extension/.env.example apps/extension.env
+  # Edit apps/extension/.env with Open AI or Anthropic API Keys
+  ```
+
+4. **Start development:**
 
    ```bash
    pnpm dev
@@ -105,7 +111,7 @@ If you want to contribute to MCP-B or run the examples locally:
    - Launches extension in Chrome with hot reload
    - Starts documentation website and all package watchers
 
-4. **Find your extension ID (if needed):**
+5. **Find your extension ID (if needed):**
 
    - Open Chrome at `chrome://extensions/`
    - Enable "Developer mode"
@@ -113,7 +119,7 @@ If you want to contribute to MCP-B or run the examples locally:
    - Update `apps/native-server/.env` with `DEV_EXTENSION_ID=your-extension-id`
    - Restart `pnpm dev`
 
-5. **Run examples** - See the [MCP-B Examples Repository](https://github.com/WebMCP-org/examples) for example applications.
+6. **Run examples** - See the [MCP-B Examples Repository](https://github.com/WebMCP-org/examples) for example applications.
 
 ### Adding MCP-B to Your Existing Website
 

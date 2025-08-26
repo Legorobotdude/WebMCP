@@ -16,30 +16,26 @@ import {
 } from 'lucide-react';
 import { useNavigate } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
-// import { AssistantChatTransport } from '../components/assistant-ui/AssistantChatTransport';
 import { client, transport } from '../lib/client';
-import { ModelConfig, useModelConfigStore } from '../lib/modelConfig';
+import {
+  modelConfigCollection,
+  defaultModelConfig,
+  getModelName,
+  getAPIKey,
+} from '../lib/modelConfig';
+import { useLiveQuery, eq } from '@tanstack/react-db';
 
 const Chat = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isToolSelectorOpen, setIsToolSelectorOpen] = useState(false);
   const navigate = useNavigate();
 
-  const { config: modelConfig } = useModelConfigStore();
-
-  const getModelName = (config: ModelConfig) => {
-    if (config.modelProvider === 'openai') {
-      return config.openaiModelName;
-    }
-    return config.anthropicModelName;
-  };
-
-  const getAPIKey = (config: ModelConfig) => {
-    if (config.modelProvider === 'openai') {
-      return config.openaiApiKey;
-    }
-    return config.anthropicApiKey;
-  };
+  const lqConfig = useLiveQuery((q) =>
+    q
+      .from({ modelConfig: modelConfigCollection })
+      .where(({ modelConfig }) => eq(modelConfig.id, '1'))
+  );
+  const modelConfig = lqConfig.data[0] || defaultModelConfig;
 
   // // Example 1: Custom API URL while keeping system/tools forwarding
   const runtime = useChatRuntime({
