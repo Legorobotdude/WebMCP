@@ -91,7 +91,16 @@ If you want to contribute to MCP-B or run the examples locally:
    # Edit apps/native-server/.env with your extension ID
    ```
 
-3. **Start development:**
+3. **Configure Claude API Key (optional, for backend development):**
+
+   ```bash
+   # Create a .dev.vars file in apps/backend from the example
+   cp apps/backend/.dev.vars.example apps/backend/.dev.vars
+   # Edit apps/backend/.dev.vars with your Claude API key
+   # ANTHROPIC_API_KEY="your_claude_api_key_here"
+   ```
+
+4. **Start development:**
 
    ```bash
    pnpm dev
@@ -105,7 +114,7 @@ If you want to contribute to MCP-B or run the examples locally:
    - Launches extension in Chrome with hot reload
    - Starts documentation website and all package watchers
 
-4. **Find your extension ID (if needed):**
+5. **Find your extension ID (if needed):**
 
    - Open Chrome at `chrome://extensions/`
    - Enable "Developer mode"
@@ -113,7 +122,7 @@ If you want to contribute to MCP-B or run the examples locally:
    - Update `apps/native-server/.env` with `DEV_EXTENSION_ID=your-extension-id`
    - Restart `pnpm dev`
 
-5. **Run examples** - See the [MCP-B Examples Repository](https://github.com/WebMCP-org/examples) for example applications.
+6. **Run examples** - See the [MCP-B Examples Repository](https://github.com/WebMCP-org/examples) for example applications.
 
 ### Adding MCP-B to Your Existing Website
 
