@@ -2,7 +2,13 @@ import { Thread } from '@/entrypoints/sidepanel/components/assistant-ui/thread';
 import { ThreadList } from '@/entrypoints/sidepanel/components/assistant-ui/thread-list';
 import { ToolSelector } from '@/entrypoints/sidepanel/components/tool-selector';
 import { Button } from '@/entrypoints/sidepanel/components/ui/button';
-import { AssistantRuntimeProvider } from '@assistant-ui/react';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/entrypoints/sidepanel/components/ui/tooltip';
+import { AssistantRuntimeProvider, useAssistantRuntime } from '@assistant-ui/react';
 import { AssistantChatTransport, useChatRuntime } from '@assistant-ui/react-ai-sdk';
 import { lastAssistantMessageIsCompleteWithToolCalls } from 'ai';
 import { McpClientProvider } from '@mcp-b/mcp-react-hooks';
@@ -12,23 +18,26 @@ import {
   ChevronRightIcon,
   HelpCircleIcon,
   MenuIcon,
+  PlusIcon,
   Settings2Icon,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 // import { AssistantChatTransport } from '../components/assistant-ui/AssistantChatTransport';
 import { client, transport } from '../lib/client';
 
-const Chat = () => {
+// Inner component that has access to the runtime context
+const ChatContent = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isToolSelectorOpen, setIsToolSelectorOpen] = useState(false);
+  const assistantRuntime = useAssistantRuntime();
 
-  // // Example 1: Custom API URL while keeping system/tools forwarding
-  const runtime = useChatRuntime({
-    transport: new AssistantChatTransport({
-      api: 'http://localhost:8787/api/chat', // Custom API URL with forwarding
-    }),
-    sendAutomaticallyWhen: (messages) => lastAssistantMessageIsCompleteWithToolCalls(messages),
-  }); // Allow other components to open the tool selector via a window event
+  // Handle new chat creation
+  const handleNewChat = () => {
+    // Use the proper Assistant UI API to create a new thread
+    assistantRuntime.switchToNewThread();
+  };
+
+  // Allow other components to open the tool selector via a window event
   useEffect(() => {
     const handler = () => setIsToolSelectorOpen(true);
     window.addEventListener('open-tool-selector', handler as EventListener);
@@ -36,8 +45,8 @@ const Chat = () => {
   }, []);
 
   return (
-    <McpClientProvider client={client} transport={transport} opts={{}}>
-      <AssistantRuntimeProvider runtime={runtime}>
+    <TooltipProvider>
+      <McpClientProvider client={client} transport={transport} opts={{}}>
         {isToolSelectorOpen ? (
           // Tool selector view
           <ToolSelector onClose={() => setIsToolSelectorOpen(false)} />
@@ -75,56 +84,104 @@ const Chat = () => {
             <div className="toolbar-surface">
               <div className="toolbar-inner">
                 <div className="toolbar-group">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="btn-toolbar-primary"
-                    onClick={() => setIsSidebarOpen(true)}
-                  >
-                    <MenuIcon className="h-4 w-4" />
-                    <span className="text-xs font-medium">Threads</span>
-                  </Button>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="btn-toolbar-primary"
+                        onClick={() => setIsSidebarOpen(true)}
+                      >
+                        <MenuIcon className="h-4 w-4" />
+                        <span className="text-xs font-medium">Threads</span>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>View all threads</TooltipContent>
+                  </Tooltip>
+
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="btn-toolbar-icon-primary"
+                        onClick={handleNewChat}
+                      >
+                        <PlusIcon className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>New chat</TooltipContent>
+                  </Tooltip>
 
                   <div className="w-px h-6 bg-border/50 mx-1" />
 
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="btn-toolbar-icon-primary"
-                    onClick={() => setIsToolSelectorOpen(true)}
-                    title="Select Tools"
-                  >
-                    <BrainCircuitIcon className="h-4 w-4" />
-                  </Button>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="btn-toolbar-icon-primary"
+                        onClick={() => setIsToolSelectorOpen(true)}
+                      >
+                        <BrainCircuitIcon className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Select tools</TooltipContent>
+                  </Tooltip>
 
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-9 w-9 p-0 hover:bg-primary/10 transition-colors"
-                    disabled
-                    title="Settings (Coming Soon)"
-                  >
-                    <Settings2Icon className="h-4 w-4 text-muted-foreground" />
-                  </Button>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-9 w-9 p-0 hover:bg-primary/10 transition-colors"
+                        disabled
+                      >
+                        <Settings2Icon className="h-4 w-4 text-muted-foreground" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Settings (Coming soon)</TooltipContent>
+                  </Tooltip>
                 </div>
 
                 <div className="toolbar-group">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="btn-toolbar-icon-secondary"
-                    disabled
-                    title="Help (Coming Soon)"
-                  >
-                    <HelpCircleIcon className="h-4 w-4 text-muted-foreground" />
-                  </Button>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="btn-toolbar-icon-secondary"
+                        disabled
+                      >
+                        <HelpCircleIcon className="h-4 w-4 text-muted-foreground" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Help (Coming soon)</TooltipContent>
+                  </Tooltip>
                 </div>
               </div>
             </div>
           </div>
         )}
-      </AssistantRuntimeProvider>
-    </McpClientProvider>
+      </McpClientProvider>
+    </TooltipProvider>
+  );
+};
+
+// Main component that provides the runtime
+const Chat = () => {
+  // Example 1: Custom API URL while keeping system/tools forwarding
+  const runtime = useChatRuntime({
+    transport: new AssistantChatTransport({
+      api: 'http://localhost:8787/api/chat', // Custom API URL with forwarding
+    }),
+    sendAutomaticallyWhen: (messages) => lastAssistantMessageIsCompleteWithToolCalls(messages),
+  });
+
+  return (
+    <AssistantRuntimeProvider runtime={runtime}>
+      <ChatContent />
+    </AssistantRuntimeProvider>
   );
 };
 
