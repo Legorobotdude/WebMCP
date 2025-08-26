@@ -14,18 +14,38 @@ import {
   MenuIcon,
   Settings2Icon,
 } from 'lucide-react';
+import { useNavigate } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
-// import { AssistantChatTransport } from '../components/assistant-ui/AssistantChatTransport';
 import { client, transport } from '../lib/client';
+import {
+  modelConfigCollection,
+  defaultModelConfig,
+  getModelName,
+  getAPIKey,
+} from '../lib/modelConfig';
+import { useLiveQuery, eq } from '@tanstack/react-db';
 
 const Chat = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isToolSelectorOpen, setIsToolSelectorOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const lqConfig = useLiveQuery((q) =>
+    q
+      .from({ modelConfig: modelConfigCollection })
+      .where(({ modelConfig }) => eq(modelConfig.id, '1'))
+  );
+  const modelConfig = lqConfig.data?.[0] || defaultModelConfig;
 
   // // Example 1: Custom API URL while keeping system/tools forwarding
   const runtime = useChatRuntime({
     transport: new AssistantChatTransport({
-      api: 'http://localhost:8787/api/chat', // Custom API URL with forwarding
+      api: 'http://localhost:8787/api/chat', // Custom API URL with trusted HTTPS for secure local dev
+      headers: {
+        'x-model-provider': modelConfig.modelProvider,
+        'x-model-name': getModelName(modelConfig) || '',
+        'x-api-key': getAPIKey(modelConfig) || '',
+      },
     }),
     sendAutomaticallyWhen: (messages) => lastAssistantMessageIsCompleteWithToolCalls(messages),
   }); // Allow other components to open the tool selector via a window event
@@ -101,10 +121,10 @@ const Chat = () => {
                     variant="ghost"
                     size="sm"
                     className="h-9 w-9 p-0 hover:bg-primary/10 transition-colors"
-                    disabled
-                    title="Settings (Coming Soon)"
+                    title="Settings"
+                    onClick={() => navigate({ to: '/settings' })}
                   >
-                    <Settings2Icon className="h-4 w-4 text-muted-foreground" />
+                    <Settings2Icon className="h-4 w-4" />
                   </Button>
                 </div>
 

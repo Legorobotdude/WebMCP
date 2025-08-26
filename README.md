@@ -90,13 +90,11 @@ If you want to contribute to MCP-B or run the examples locally:
    cp apps/native-server/.env.example apps/native-server/.env
    # Edit apps/native-server/.env with your extension ID
    ```
-
-3. **Configure Claude API Key (optional, for backend development):**
-
+3. **Configure extension model provider and model name:**
    ```bash
    # Create a .dev.vars file in apps/backend from the example
    cp apps/backend/.dev.vars.example apps/backend/.dev.vars
-   # Edit apps/backend/.dev.vars with your Claude API key
+   # Edit apps/extension/.env with Open AI or Anthropic API Keys
    # ANTHROPIC_API_KEY="your_claude_api_key_here"
    ```
 
