@@ -92,10 +92,10 @@ If you want to contribute to MCP-B or run the examples locally:
    ```
 3. **Configure extension model provider and model name:**
 
-  ```bash
-  cp apps/extension/.env.example apps/extension.env
-  # Edit apps/extension/.env with Open AI or Anthropic API Keys
-  ```
+   ```bash
+   cp apps/extension/.env.example apps/extension.env
+   # Edit apps/extension/.env with Open AI or Anthropic API Keys
+   ```
 
 4. **Start development:**
 
